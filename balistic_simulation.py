@@ -2,11 +2,7 @@
 # coding: utf-8
 
 # # Fatores adicionais na trajetória de um projétil
-
 # O estudo da trajetória de um projétil em um campo gravitacional uniforme é uma das primeiras atividades desenvolvidas em cursos de física. Entretanto, nas soluções normalmente apresentadas o modelo recebe diversas simplificações para permitir sua solução analítica.
-# 
-# Neste projeto, vamos incluir no modelo alguns fatores normalmente ignorados e verificar seus efeitos sobre a trajetória do projétil.
-
 # ### O caso simples
 
 # Vamos começar com o caso simples em que o campo gravitacional é uniforme, o projétil é pontual e não há nenhum tipo de força externa ou dissipação de energia.
@@ -39,16 +35,12 @@
 # 
 # Com essas informações, podemos plotar as componentes da trajetória. Primeiro importamos os módulos necessários e fazemos com que os gráficos fiquem embutidos.
 
-# In[1]:
-
 
 import numpy as np
 import matplotlib.pyplot as plt
 get_ipython().run_line_magic('matplotlib', 'inline')
 
 
-
-# In[2]:
 
 
 # Função que calcula uma trajetória para o caso simples acima.
@@ -76,26 +68,12 @@ def trajetoria_simples(h, v0, g, nintervalos):
     
     return t, trajetoria
 
-
-# In[3]:
-
-
 # Parâmetros:
 h = 0.00001
 v_x0 = 20.0
 v_y0 = 0
 v_z0 =np.sqrt(700**2-v_x0**2)
 g = 9.81
-
-
-# In[ ]:
-
-
-
-
-
-# In[4]:
-
 
 # Calcula uma trajetória
 t, trajetoria = trajetoria_simples(h, (v_x0, v_y0, v_z0), g, 2)
@@ -116,40 +94,20 @@ axarray[2].set_ylabel('z')
 axarray[2].set_xlabel('t')
 plt.show()
 
-
-# In[ ]:
-
-
-
-
-
 # Mais interessante é plotar a trajetória no espaço tridimensional. Para isso, usamos o módulo `mplot3d`.
-
-# In[5]:
-
-
 from mpl_toolkits.mplot3d import Axes3D
-
-
-# In[6]:
-
 
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 ax.plot(x, y, z)
 plt.show()
 
-
 # Neste caso, como a trajetória é bidimensional (restrita ao plano $y=0$) faz mais sentido plotar apenas o plano $x, z$.
-
-# In[7]:
-
 
 plt.plot(x, z)
 plt.xlabel('x')
 plt.ylabel('z')
 plt.show()
-
 
 # O próximo passo é simularmos o sistema representado pelas equações diferenciais para comparar o resultado com o analítico apresentado acima. Para isso, como sempre, precisamos converter o sistema de equações em um sistema de equações de primeiro grau, usando o truque tradicional de incluir variáveis para as velocidades. Assim, além das posições $x, y, z$, teremos também as velocidades $u, v, w$, respectivamente, e o conjunto de equações fica:
 # 
@@ -166,22 +124,12 @@ plt.show()
 # 
 # Com isso podemos usar o `odeint` do SciPy para resolver numericamente o sistema de equações.
 
-# In[8]:
-
-
 from scipy.integrate import odeint
-
-
-# In[9]:
-
 
 # Função que calcula as derivadas para o estado xyzuvw no instante t
 def deriv_ideal(xyzuvw, t, g):
     x, y, z, u, v, w = xyzuvw
     return [u, v, w, 0, 0, -g]
-
-
-# In[10]:
 
 
 # Usamos os mesmos parâmetros e o mesmo t anteriores
@@ -192,18 +140,7 @@ xs = xyzuvw_t[:, 0]
 ys = xyzuvw_t[:, 1]
 zs = xyzuvw_t[:, 2]
 
-
-# In[ ]:
-
-
-
-
-
 # Agora podemos plotar as duas trajetórias simultaneamente para verificar se há diferença.
-
-# In[11]:
-
-
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 ax.plot(x, y, z, label='Analítica')
@@ -214,17 +151,13 @@ plt.show()
 
 # Ou no plano $(x, z)$:
 
-# In[12]:
-
-
 plt.plot(x, z, label='Analitica')
 plt.plot(xs, zs, label='Simulada')
 plt.xlabel('x')
 plt.ylabel('z')
 plt.legend()
+
 plt.show()
-
-
 # Vemos que as duas trajetórias estão superpostas, como esperado.
 # 
 # Infelizmente, no código acima fizemos uma trapaça: Usamos o intervalo de tempo calculado considerando a solução analítica, **que não estaria disponível se precisássemos realizar simulações!**
@@ -235,9 +168,6 @@ plt.show()
 # 
 # A primeira solução tem a vantagem de porder usar `odeint` e é viável quando temos razão para acreditar que sabemos uma boa aproximação inicial para $T$. Se não temos uma aproximação para $T$, então devemos usar a segunda solução, que infelizmente não pode fazer uso de `odeint`, mas precisamos usar um objeto da classe `ode` e realizar a integração passo a passo, como exemplificado no código abaixo.
 
-# In[13]:
-
-
 # Função de derivadas para a classe ode.
 # Note a inversão da ordem dos parâmetros t e xyzuvw em relação à outra derivada!
 def deriv_ideal_2(t, xyzuvw, g): 
@@ -245,16 +175,7 @@ def deriv_ideal_2(t, xyzuvw, g):
     return [u, v, w, 0, 0, -g]
 
 
-# Precisamos importar a classe `ode`.
-
-# In[14]:
-
-
 from scipy.integrate import ode
-
-
-# In[15]:
-
 
 # Especificamos o tempo inicial e o intervalo entre instantes sucessivos
 t0 = 0
@@ -285,27 +206,13 @@ ys2 = xyzuvw_t2[:, 1]
 zs2 = xyzuvw_t2[:, 2]
 
 
-# In[40]:
-
-
-t2
-
-
-# In[16]:
-
-
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 ax.plot(x, y, z, label='Analítica')
 ax.plot(xs2, ys2, zs2, label='Simulada')
 ax.legend()
 plt.show()
-
-
 # Por curiosidade, vejamos se os dois sistemas estão sendo simulados no mesmo intervalo de tempo:
-
-# In[17]:
-
 
 print('O valor de T é', t[-1])
 print('O sistema foi simulado até', t2[-1])
@@ -328,18 +235,6 @@ print('Compare isso com o incremento de tempo escolhido de', Δt)
 # R_y & = & - B v v_y\\
 # R_z & = & - B v v_z
 # \end{eqnarray}
-# 
-# Adicione esses componentes nas equações e simule o sistema com os seguintes parâmetros:
-# - $B/m=4\cdot10^{-5}$
-# - A velocidade inicial tem sempre módulo $700m/s$, mas faz um ângulo $\theta$ em relação à horizontal.
-# - O projétil é lançado de $(0,0,0)$.
-# 
-# Simule para alguns valores de $\theta$, $0 < \theta < 90°$ e compare com o resultado analítico:
-# - Como o alcance do tiro (máxima coordenada $x$ da trajetória) é afetado pela resistência do ar?
-# - Como a máxima altitude do projétil é afetada pela resistência do ar?
-# - Calcule, com uma precisão de 1°, o ângulo para o qual o alcance é máximo. O alcance máximo acontece com um ângulo de 45°, como no caso ideal?
-
-# In[18]:
 
 
 # Função de derivadas para a classe ode.
@@ -350,10 +245,6 @@ def deriv_resistencia_analitica(xyzuvw_res,t, g):
     k=4e-5
     return [u_res, v_res, w_res,-k*mod_vel*u_res, -k*mod_vel*v_res, -g -k*mod_vel*w_res]
 
-
-# In[19]:
-
-
 # Função de derivadas para a classe ode.
 # Note a inversão da ordem dos parâmetros t e xyzuvw em relação à outra derivada!
 def deriv_resistencia(t, xyzuvw_res, g): 
@@ -362,18 +253,10 @@ def deriv_resistencia(t, xyzuvw_res, g):
     k=4e-5
     return [u_res, v_res, w_res,-k*mod_vel*u_res, -k*mod_vel*v_res, -g -k*mod_vel*w_res]
 
-
-# In[20]:
-
-
 xyzuvw_t = odeint(deriv_resistencia_analitica, iniciais, t, args=(g,))
 xs_an = xyzuvw_t[:, 0]
 ys_an = xyzuvw_t[:, 1]
 zs_an = xyzuvw_t[:, 2]
-
-
-# In[21]:
-
 
 ang = np.zeros(91)
 for i in range(91):
@@ -383,23 +266,13 @@ print(ang[90])
 k = 0.00004
 g = 9.81
 
-
-# In[22]:
-
-
 v0 = np.array([700])
 vx = v0 * np.cos(ang)
 vy = np.zeros(91)
 vz = v0 * np.sin(ang)
 
-
-# In[23]:
-
-
 # Criamos um objeto da classe ode associado à função correta de derivadas
 r = ode(deriv_resistencia)
-
-
 
 # Ajustamos os dados do sistema simulado nesse objeto
 r.set_initial_value(iniciais, t0) # Indica as condições inicias e instante inicial
@@ -423,13 +296,6 @@ xs3 = xyzuvw_t2[:, 0]
 ys3 = xyzuvw_t2[:, 1]
 zs3 = xyzuvw_t2[:, 2]
 
-
-   
-
-
-# In[24]:
-
-
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 ax.plot(xs2, ys2, zs2, label='Sem resistencia')
@@ -437,10 +303,6 @@ ax.plot(xs_an, ys_an, zs_an, label='Com resistencia analítica')
 ax.plot(xs3, ys3, zs3, label='Com resistencia')
 ax.legend()
 plt.show()
-
-
-# In[25]:
-
 
 #Diferença entre os máximos em x e em y
 
@@ -458,10 +320,6 @@ print('Porcentualmente significa', 100*difx/maxx_sem_res,'%')
 print('A diferença no eixo z é',difz)
 print('Porcentualmente significa', 100*difz/maxz_sem_res,'%')
 
-
-# In[26]:
-
-
 plt.plot(xs2, zs2, label='Sem resistencia')
 plt.plot(xs_an, zs_an, label='Com resistencia e analitica')
 plt.plot(xs3, zs3, label='Com resistencia')
@@ -470,9 +328,6 @@ plt.xlabel('x')
 plt.ylabel('z')
 plt.legend()
 plt.show()
-
-
-# In[27]:
 
 
 v0 = np.array([700])
@@ -534,21 +389,12 @@ print(vector.index(maxx)-1,'graus')
 # 
 # 
 
-# In[28]:
-
-
 plt.plot(ys2, zs2, label='Com resistencia')
 plt.plot(ys3, zs3, label='Sem resistencia')
 plt.xlabel('y')
 plt.ylabel('z')
 plt.legend()
 plt.show()
-
-
-# In[29]:
-
-
-print(xs3)
 
 
 # ### Trajetória de uma bala de canhão: Variação da densidade do ar
@@ -563,10 +409,6 @@ print(xs3)
 # 
 # $$\hat{R} = \frac{\rho}{\rho_0}R = \left( 1 - \frac{a z}{T_0}\right)^\alpha B v^2$$.
 # 
-# Faça as alterações necessárias nas equações, simule o sistema e compare os resultados tanto com o modelo sem variação de densidade do ar quanto com o modelo sem resistência do ar.
-
-# In[30]:
-
 
 def deriv_densidade(t, xyzuvw_dens, g): 
     x_dens, y_dens, z_dens, u_dens, v_dens, w_dens = xyzuvw_dens
@@ -579,17 +421,12 @@ def deriv_densidade(t, xyzuvw_dens, g):
     return [u_dens, v_dens, w_dens,-k*R*mod_vel*u_dens, -k*R*mod_vel*v_dens, -g -k*R*mod_vel*w_dens]
 
 
-# In[31]:
-
-
 # Criamos um objeto da classe ode associado à função correta de derivadas
 
 t0 = 0
 Δt = 0.01
 
 r = ode(deriv_densidade)
-
-
 
 # Ajustamos os dados do sistema simulado nesse objeto
 r.set_initial_value(iniciais, t0) # Indica as condições inicias e instante inicial
@@ -612,12 +449,6 @@ xs4 = xyzuvw_t2[:, 0]
 ys4 = xyzuvw_t2[:, 1]
 zs4 = xyzuvw_t2[:, 2]
 
-    
-   
-
-
-# In[32]:
-
 
 fig = plt.figure()
 ax = fig.gca(projection='3d')
@@ -628,8 +459,6 @@ ax.plot(xs4, ys4, zs4, label='Com densidade')
 ax.legend()
 plt.show()
 
-
-# In[33]:
 
 
 plt.plot(xs2, zs2, label='Sem resistencia')
@@ -651,19 +480,6 @@ plt.show()
 # $$ \frac{B}{m} = 0.0039 + \frac{0.0058}{1 + \exp \left[(v - v_d)/\Delta\right]},$$
 # 
 # onde $v$ é o módulo da velocidade da bola, $v_d=35m/s$, $\Delta = 5m/s$ e tudo está em unidade SI.
-# 
-# Reescreva as equações para levar em conta esse efeito. Além disso:
-# - Despreze variações de densidade (pois a bola nunca sobe muito).
-# - Considere que a bola é lançada de $(0,0,1)$ com velocidade de $50 m/s$ e ângulo $\theta=35°$.
-# - Compare o resultado com o movimento no vácuo e com o movimento no ar mas desprezando a variação de $B/m$ (isto é, use o valor de $B/m$ para $v=0$).
-
-# In[ ]:
-
-
-
-
-
-# In[34]:
 
 
 def deriv_baseball(t,xyzuvw_base, g): 
@@ -673,10 +489,6 @@ def deriv_baseball(t,xyzuvw_base, g):
     b_m=0.0039 +0.0058/(1+fator_expo)
     return [u_base, v_base, w_base,-b_m*mod_vel*u_base, -b_m*mod_vel*v_base, -g -b_m*mod_vel*w_base]
 
-
-# In[35]:
-
-
 def deriv_baseball_2(t,xyzuvw_base, g): 
     x_base, y_base, z_base, u_base, v_base, w_base = xyzuvw_base
     mod_vel=np.sqrt(u_base**2+v_base**2+w_base**2)
@@ -685,14 +497,7 @@ def deriv_baseball_2(t,xyzuvw_base, g):
     return [u_base, v_base, w_base,-b_m*mod_vel*u_base, -b_m*mod_vel*v_base, -g -b_m*mod_vel*w_base]
 
 
-# In[36]:
-
-
 iniciais = [0, 0, 1, 50*np.cos(np.deg2rad(35)), 0, 50*np.sin(np.deg2rad(35))]
-
-
-# In[37]:
-
 
 r = ode(deriv_baseball)
 
@@ -719,12 +524,7 @@ xs5 = xyzuvw_t2[:, 0]
 ys5 = xyzuvw_t2[:, 1]
 zs5 = xyzuvw_t2[:, 2]
 
-
-# In[38]:
-
-
 r = ode(deriv_baseball_2)
-
 
 
 # Ajustamos os dados do sistema simulado nesse objeto
@@ -749,15 +549,6 @@ ys5_constante = xyzuvw_t2[:, 1]
 zs5_constante = xyzuvw_t2[:, 2]
 
 
-# In[ ]:
-
-
-
-
-
-# In[39]:
-
-
 plt.plot(xs5_constante, zs5_constante, label='Sem variação de b/m')
 plt.plot(xs5, zs5, label='Com variação de b/m')
 
@@ -765,32 +556,4 @@ plt.xlabel('x')
 plt.ylabel('z')
 plt.legend()
 plt.show()
-
-
-# ### Spin na bola de baseball
-
-# Por fim, vamos incluir também o efeito de spin. Quando a bola roda, além de ter uma velocidade inicial, a rotação tem uma influência na trajetória, devido ao conhecido efeito Magnus.
-# 
-# Como argumentado no livro de Giordano e Nakanishi, a força de Magnus pode ser escrita como:
-# 
-# $$ \mathbf{M} = S_0 \mathbf{\omega}\times\mathbf{v},$$
-# 
-# onde $\mathbf{M}$ é o vetor da força de Magnus, $\mathbf{\omega}$ é o vetor da rotação, $\mathbf{v}$ é o vetor de velocidade e $\times$ indica produto vetorial.
-# 
-# Inclua esse fator no cálculo da trajetória da bola de baseball:
-# - Use $S_0/m\approx 4.1\cdot10^{-4}.$
-# - considere posição e velocidades iniciais como no caso anterior, $B/m$ variável com $v$.
-# - Conside que o módulo da velocidade de rotação é $|\omega|=30$ (rotações por segundo).
-# - Analise os seguintes casos:
-#   - $\mathbf{\omega}$ é na direção $y$ positiva.
-#   - $\mathbf{\omega}$ é na direção $y$ negativa.
-#   - $\mathbf{\omega}$ é na direção $z$ positiva.
-#   - $\mathbf{\omega}$ é na direção $z$ negativa.
-#   
-# O que acontece com a trajetória em cada caso? Como elas se compara com as trajetórias sem rotação?
-
-# In[ ]:
-
-
-
 
